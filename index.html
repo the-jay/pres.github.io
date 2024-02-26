@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random US President Facts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        #president-info {
+            margin-top: 50px;
+        }
+        #president-img {
+            max-width: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <h1>Random US President Facts</h1>
+    <div id="president-info">
+        <p>Loading...</p>
+    </div>
+    <script>
+        // Function to fetch JSON file and display random president info
+        function displayRandomPresident() {
+            fetch('presidents.json')
+                .then(response => response.json())
+                .then(data => {
+                    const randomIndex = Math.floor(Math.random() * data.length);
+                    const president = data[randomIndex];
+                    const presidentInfo = `
+                        <h2>${president.name}</h2>
+                        <p>Years Served: ${president.years_served}</p>
+                        <p>Wife: ${president.wife}</p>
+                        <p>Bio: ${president.bio}</p>
+                    `;
+                    document.getElementById('president-info').innerHTML = presidentInfo;
+
+                    // Display president image if available
+                    const imgSrc = `images/${president.name.replace(/\s/g, '_')}.jpg`;
+                    const imgTag = `<img src="${imgSrc}" alt="${president.name}" id="president-img">`;
+                    const imgElement = new Image();
+                    imgElement.src = imgSrc;
+                    imgElement.onload = function() {
+                        document.getElementById('president-info').insertAdjacentHTML('afterbegin', imgTag);
+                    };
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        // Call function on page load
+        displayRandomPresident();
+    </script>
+</body>
+</html>
