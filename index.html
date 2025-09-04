@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random US Presidents</title>
+  <title>US Presidents</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -26,7 +26,14 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       padding: 15px;
-      width: 250px;
+      margin: 10px;
+      flex: 1 0 calc(25% - 20px);
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out;
+    }
+    .card:hover {
+      transform: scale(1.02);
     }
     .card img {
       max-width: 100%;
@@ -36,14 +43,22 @@
       font-size: 1.2em;
       margin: 10px 0 5px;
     }
-    .card p {
+    .details {
+      display: none;
+      text-align: left;
+      margin-top: 10px;
+    }
+    .card.expanded .details {
+      display: block;
+    }
+    .details p {
       margin: 5px 0;
       font-size: 0.9em;
     }
   </style>
 </head>
 <body>
-  <h1>Random US Presidents</h1>
+  <h1>US Presidents</h1>
   <div id="card-container"></div>
   <script>
     async function fetchPresidentImage(name) {
@@ -59,18 +74,19 @@
     async function displayPresidents() {
       const response = await fetch('presidents.json');
       const data = await response.json();
-      const selected = data.sort(() => 0.5 - Math.random()).slice(0, 4);
+      data.sort((a, b) => parseInt(a.years_served.split('–')[0]) - parseInt(b.years_served.split('–')[0]));
       const container = document.getElementById('card-container');
 
-      for (const pres of selected) {
+      for (const pres of data) {
         const card = document.createElement('div');
         card.className = 'card';
 
-        const img = document.createElement('img');
         const imgUrl = await fetchPresidentImage(pres.name);
         if (imgUrl) {
+          const img = document.createElement('img');
           img.src = imgUrl;
           img.alt = pres.name;
+          img.loading = 'lazy';
           card.appendChild(img);
         }
 
@@ -78,17 +94,18 @@
         title.textContent = pres.name;
         card.appendChild(title);
 
-        const years = document.createElement('p');
-        years.textContent = `Years Served: ${pres.years_served}`;
-        card.appendChild(years);
+        const details = document.createElement('div');
+        details.className = 'details';
+        details.innerHTML = `
+          <p><strong>Years Served:</strong> ${pres.years_served}</p>
+          <p><strong>Spouse:</strong> ${pres.wife}</p>
+          <p>${pres.bio}</p>
+        `;
+        card.appendChild(details);
 
-        const wife = document.createElement('p');
-        wife.textContent = `Wife: ${pres.wife}`;
-        card.appendChild(wife);
-
-        const bio = document.createElement('p');
-        bio.textContent = pres.bio;
-        card.appendChild(bio);
+        card.addEventListener('click', () => {
+          card.classList.toggle('expanded');
+        });
 
         container.appendChild(card);
       }
